@@ -40,37 +40,75 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 AUTO_MODE=${AUTO_MODE:-false}
 
 # =============================================================================
-# Package Mapping
+# Package Configuration
 # =============================================================================
-# Format: "yaml_key|cli_command|nix_pkg_primary"
-# yaml_key: path in .versions.yaml (use _ for nested keys)
-# cli_command: command name to check if tool works
-# nix_pkg_primary: primary Nix package name to search
 
-PACKAGE_MAP=(
-    "languages.go|go|go"
-    "testing_tools.kubectl|kubectl|kubectl"
-    "testing_tools.kind|kind|kind"
-    "testing_tools.helm|helm|kubernetes-helm"
-    "testing_tools.tilt|tilt|tilt"
-    "testing_tools.ctlptl|ctlptl|ctlptl"
-    "build_tools.ko|ko|ko"
-    "build_tools.goreleaser|goreleaser|goreleaser"
-    "build_tools.crane|crane|crane"
-    "build_tools.git_cliff|git-cliff|git-cliff"
-    "linting.golangci_lint|golangci-lint|golangci-lint"
-    "linting.yamllint|yamllint|yamllint"
-    "linting.addlicense|addlicense|addlicense"
-    "linting.go_licenses|go-licenses|go-licenses"
-    "security_tools.grype|grype|grype"
+# Packages to install (CLI command name = flox package name by default)
+PACKAGES=(
+    # From .versions.yaml
+    go
+    kubectl
+    kind
+    helm
+    tilt
+    ctlptl
+    ko
+    goreleaser
+    crane
+    git-cliff
+    golangci-lint
+    yamllint
+    addlicense
+    go-licenses
+    grype
+    # Extra utilities
+    yq
+    jq
+    curl
 )
 
-# Additional utilities not in .versions.yaml but useful for development
-EXTRA_PACKAGES=(
-    "yq|yq|yq-go"
-    "jq|jq|jq"
-    "curl|curl|curl"
-)
+# Get nix package name for a CLI command (handles overrides)
+get_nix_pkg() {
+    local cli_cmd="$1"
+    case "$cli_cmd" in
+        helm) echo "kubernetes-helm" ;;
+        yq)   echo "yq-go" ;;
+        *)    echo "$cli_cmd" ;;
+    esac
+}
+
+# Get version constraint from .versions.yaml (uses sed/awk, no yq dependency)
+# Returns version string or empty if not found
+get_version() {
+    local cli_cmd="$1"
+    local versions_file="${REPO_ROOT}/.versions.yaml"
+
+    [[ ! -f "$versions_file" ]] && return
+
+    # Map CLI command to .versions.yaml key
+    local yaml_key
+    case "$cli_cmd" in
+        go)            yaml_key="go:" ;;
+        kubectl)       yaml_key="kubectl:" ;;
+        kind)          yaml_key="kind:" ;;
+        helm)          yaml_key="helm:" ;;
+        tilt)          yaml_key="tilt:" ;;
+        ctlptl)        yaml_key="ctlptl:" ;;
+        ko)            yaml_key="ko:" ;;
+        goreleaser)    yaml_key="goreleaser:" ;;
+        crane)         yaml_key="crane:" ;;
+        git-cliff)     yaml_key="git_cliff:" ;;
+        golangci-lint) yaml_key="golangci_lint:" ;;
+        yamllint)      yaml_key="yamllint:" ;;
+        addlicense)    yaml_key="addlicense:" ;;
+        go-licenses)   yaml_key="go_licenses:" ;;
+        grype)         yaml_key="grype:" ;;
+        *)             return ;;  # No version constraint for extras (yq, jq, curl)
+    esac
+
+    # Extract full version, strip quotes and 'v' prefix
+    grep "$yaml_key" "$versions_file" | head -1 | awk '{print $2}' | tr -d "'" | sed 's/^v//'
+}
 
 # =============================================================================
 # Functions
@@ -155,40 +193,68 @@ prompt_package_choice() {
     done
 }
 
-# Install a package with explicit ID
-# Args: $1 = package id, $2 = pkg-path
+# Install a package with explicit ID and optional version
+# Tries versions in order of precision: exact -> major.minor -> major -> none
+# Args: $1 = package id, $2 = pkg-path, $3 = version (optional)
 install_package() {
     local pkg_id="$1"
     local pkg_path="$2"
+    local version="${3:-}"
 
-    log_info "Installing $pkg_id ($pkg_path)..."
-    if flox install -i "$pkg_id" "$pkg_path"; then
-        log_success "Installed $pkg_id"
-        return 0
-    else
+    if [[ -z "$version" ]]; then
+        log_info "Installing $pkg_id ($pkg_path)..."
+        if flox install -i "$pkg_id" "$pkg_path" 2>/dev/null; then
+            log_success "Installed $pkg_id"
+            return 0
+        fi
         log_error "Failed to install $pkg_id"
         return 1
     fi
+
+    # Build version variants: exact, major.minor, major
+    local major_minor major
+    major_minor=$(echo "$version" | cut -d. -f1,2)
+    major=$(echo "$version" | cut -d. -f1)
+
+    local -a versions=("$version")
+    [[ "$major_minor" != "$version" ]] && versions+=("$major_minor")
+    [[ "$major" != "$major_minor" ]] && versions+=("$major")
+    versions+=("")  # fallback: no version constraint
+
+    for v in "${versions[@]}"; do
+        local install_spec="$pkg_path"
+        [[ -n "$v" ]] && install_spec="${pkg_path}@${v}"
+
+        log_info "Trying $pkg_id ($install_spec)..."
+        if flox install -i "$pkg_id" "$install_spec" 2>/dev/null; then
+            log_success "Installed $pkg_id ($install_spec)"
+            return 0
+        fi
+    done
+
+    log_error "Failed to install $pkg_id (tried all version variants)"
+    return 1
 }
 
-# Process a single package mapping
-# Args: $1 = mapping string, $2 = installed packages
+# Process a single package
+# Args: $1 = CLI command name, $2 = installed packages
 process_package() {
-    local mapping="$1"
+    local cli_cmd="$1"
     local installed="$2"
-
-    IFS='|' read -r yaml_key cli_cmd nix_pkg <<< "$mapping"
 
     # Check if already installed
     if is_installed "$cli_cmd" "$installed"; then
-        # Get version from installed list
         local version
         version=$(echo "$installed" | grep "^${cli_cmd}|" | cut -d'|' -f3)
         log_success "$cli_cmd already installed ($version)"
         return 0
     fi
 
-    log_info "Searching for $cli_cmd (package: $nix_pkg)..."
+    # Get nix package name (handles overrides like helm -> kubernetes-helm)
+    local nix_pkg
+    nix_pkg=$(get_nix_pkg "$cli_cmd")
+
+    log_info "Searching for $cli_cmd..."
 
     # Search for package
     local results
@@ -199,12 +265,76 @@ process_package() {
         return 1
     fi
 
+    # Get version constraint from .versions.yaml
+    local version
+    version=$(get_version "$cli_cmd")
+
     # Prompt user (or auto-select in AUTO_MODE)
     if prompt_package_choice "$cli_cmd" "$results"; then
-        install_package "$cli_cmd" "$SELECTED_PKG"
+        install_package "$cli_cmd" "$SELECTED_PKG" "$version"
     else
         log_info "Skipped $cli_cmd"
     fi
+}
+
+# Update manifest.toml to add version constraint for an installed package
+# Tries versions in order of precision until one is available
+# Args: $1 = package id
+update_package_version() {
+    local pkg_id="$1"
+    local manifest="${REPO_ROOT}/.flox/env/manifest.toml"
+
+    # Get desired version from .versions.yaml
+    local version
+    version=$(get_version "$pkg_id")
+    [[ -z "$version" ]] && return 0  # No version constraint needed
+
+    # Check if version and pkg-group already set in manifest
+    if grep -q "^${pkg_id}\.version" "$manifest" 2>/dev/null; then
+        local current
+        current=$(grep "^${pkg_id}\.version" "$manifest" | sed 's/.*= *"\([^"]*\)".*/\1/')
+        # Also ensure pkg-group is set
+        if ! grep -q "^${pkg_id}\.pkg-group" "$manifest" 2>/dev/null; then
+            sed -i.bak "s/^${pkg_id}\.version = \(.*\)$/${pkg_id}.version = \1\n${pkg_id}.pkg-group = \"${pkg_id}\"/" "$manifest"
+            rm -f "${manifest}.bak"
+            log_success "$pkg_id: added pkg-group (version $current already set)"
+        else
+            log_success "$pkg_id already has version constraint ($current)"
+        fi
+        return 0
+    fi
+
+    # Build version variants: exact, major.minor, major
+    local major_minor major
+    major_minor=$(echo "$version" | cut -d. -f1,2)
+    major=$(echo "$version" | cut -d. -f1)
+
+    local -a versions=("$version")
+    [[ "$major_minor" != "$version" ]] && versions+=("$major_minor")
+    [[ "$major" != "$major_minor" ]] && versions+=("$major")
+
+    # Get available versions via flox show
+    local nix_pkg
+    nix_pkg=$(get_nix_pkg "$pkg_id")
+
+    local available
+    available=$(flox show "$nix_pkg" 2>/dev/null | grep "@" | awk '{print $1}' | sed "s/^${nix_pkg}@//")
+
+    for v in "${versions[@]}"; do
+        log_info "Checking if $pkg_id@$v is available..."
+        # Check if any available version starts with this prefix
+        if echo "$available" | grep -q "^${v}"; then
+            # Add version and pkg-group lines after pkg-path line
+            # pkg-group isolates each package so version constraints don't conflict
+            sed -i.bak "s/^${pkg_id}\.pkg-path = \(.*\)$/${pkg_id}.pkg-path = \1\n${pkg_id}.version = \"${v}\"\n${pkg_id}.pkg-group = \"${pkg_id}\"/" "$manifest"
+            rm -f "${manifest}.bak"
+            log_success "Added version constraint: $pkg_id@$v (pkg-group: $pkg_id)"
+            return 0
+        fi
+    done
+
+    log_warning "$pkg_id: no available version matches .versions.yaml ($version)"
+    return 1
 }
 
 # =============================================================================
@@ -236,13 +366,9 @@ main() {
 
     echo ""
 
-    # Process packages from .versions.yaml
-    log_info "Processing packages from .versions.yaml..."
-    echo ""
-
     local failed=0
-    for mapping in "${PACKAGE_MAP[@]}"; do
-        if ! process_package "$mapping" "$installed"; then
+    for pkg in "${PACKAGES[@]}"; do
+        if ! process_package "$pkg" "$installed"; then
             ((failed++)) || true
         fi
         # Refresh installed list after each install for accurate detection
@@ -250,14 +376,13 @@ main() {
     done
 
     echo ""
-    log_info "Processing extra utility packages..."
+    log_info "Updating version constraints in manifest..."
     echo ""
 
-    for mapping in "${EXTRA_PACKAGES[@]}"; do
-        if ! process_package "$mapping" "$installed"; then
-            ((failed++)) || true
+    for pkg in "${PACKAGES[@]}"; do
+        if is_installed "$pkg" "$installed"; then
+            update_package_version "$pkg" || true
         fi
-        installed=$(get_installed_packages)
     done
 
     echo ""

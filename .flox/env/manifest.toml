@@ -1,140 +1,77 @@
-# =============================================================================
-# Flox Environment Manifest
-# =============================================================================
-#
-# AUTO-GENERATED from .versions.yaml - DO NOT EDIT DIRECTLY
-#
-# Regenerate with: make flox-manifest
-#
-# This provides an alternative to 'make tools-setup' for developers who
-# prefer Flox/Nix-based development environments.
-#
-# Usage:
-#   flox activate    # Enter the development environment
-#   flox install     # Install packages without activating
-#
-# =============================================================================
-
 version = 1
 
-# Core development tools
 [install]
-# Language runtime
-go.pkg-path = "go"
-
-# Kubernetes tools
-kubectl.pkg-path = "kubectl"
-kind.pkg-path = "kind"
-helm.pkg-path = "kubernetes-helm"
-
-# Build tools
-ko.pkg-path = "ko"
-goreleaser.pkg-path = "goreleaser"
-
-# Linting
-golangci-lint.pkg-path = "golangci-lint"
-yamllint.pkg-path = "yamllint"
-
-# Development utilities
-yq.pkg-path = "yq-go"
-jq.pkg-path = "jq"
-curl.pkg-path = "curl"
-tilt.pkg-path = "tilt"
-ctlptl.pkg-path = "ctlptl"
-crane.pkg-path = "crane"
-git-cliff.pkg-path = "git-cliff"
 addlicense.pkg-path = "addlicense"
-go-licenses.pkg-path = "go-licenses"
-grype.pkg-path = "grype"
+addlicense.version = "1.1.1"
+addlicense.pkg-group = "addlicense"
 
-# Container tools (tilt and ctlptl may need manual install)
-# tilt.pkg-path = "tilt"  # May not be in nixpkgs
+crane.pkg-path = "crane"
+crane.version = "0.20.6"
+crane.pkg-group = "crane"
+
+ctlptl.pkg-path = "ctlptl"
+ctlptl.version = "0.8.43"
+ctlptl.pkg-group = "ctlptl"
+
+curl.pkg-path = "curl"
+
+git-cliff.pkg-path = "git-cliff"
+git-cliff.version = "2.12.0"
+git-cliff.pkg-group = "git-cliff"
+
+go.pkg-path = "go"
+go.version = "1.25"
+go.pkg-group = "go"
+
+go-licenses.pkg-path = "go-licenses"
+go-licenses.version = "1.6.0"
+go-licenses.pkg-group = "go-licenses"
+
+golangci-lint.pkg-path = "golangci-lint"
+golangci-lint.version = "2.6.2"
+golangci-lint.pkg-group = "golangci-lint"
+
+goreleaser.pkg-path = "goreleaser"
+goreleaser.version = "2"
+goreleaser.pkg-group = "goreleaser"
+
+grype.pkg-path = "grype"
+grype.version = "0"
+grype.pkg-group = "grype"
+
+# Build Helm 4 from source (not yet in nixpkgs)
+# https://github.com/NixOS/nixpkgs/pull/461007
+helm.flake = "git+file:.?dir=.flox/flakes/helm#helm"
+
+jq.pkg-path = "jq"
+
+kind.pkg-path = "kind"
+kind.version = "0.31.0"
+kind.pkg-group = "kind"
+
+ko.pkg-path = "ko"
+ko.version = "0.18.0"
+ko.pkg-group = "ko"
+
+kubectl.pkg-path = "kubectl"
+kubectl.version = "1.32"
+kubectl.pkg-group = "kubectl"
+
+tilt.pkg-path = "tilt"
+tilt.version = "0.35.0"
+tilt.pkg-group = "tilt"
+
+yamllint.pkg-path = "yamllint"
+yamllint.version = "1.35"
+yamllint.pkg-group = "yamllint"
+
+yq.pkg-path = "yq-go"
 
 [vars]
-# Project-specific environment variables
 EIDOS_DEV = "true"
-
-[hook]
-on-activate = '''
-# =============================================================================
-# Flox Environment Activation Hook
-# =============================================================================
-
-echo ""
-echo "Eidos Development Environment (Flox)"
-echo "====================================="
-echo ""
-
-# Version information from .versions.yaml
-echo "Configured versions (.versions.yaml):"
-echo "  Go:             1.25"
-echo "  kubectl:        1.32"
-echo "  kind:           0.31.0"
-echo "  Helm:           4.1.0"
-echo "  ko:             0.18.0"
-echo "  goreleaser:     2"
-echo "  golangci-lint:  2.6.2"
-echo "  yamllint:       1.35.0"
-echo ""
-
-# Verify key tools are available
-echo "Installed tools:"
-if command -v go &> /dev/null; then
-    echo "  go:             $(go version | awk '{print $3}')"
-else
-    echo "  go:             NOT FOUND"
-fi
-
-if command -v kubectl &> /dev/null; then
-    echo "  kubectl:        $(kubectl version --client -o json 2>/dev/null | jq -r '.clientVersion.gitVersion' 2>/dev/null || echo 'unknown')"
-else
-    echo "  kubectl:        NOT FOUND"
-fi
-
-if command -v helm &> /dev/null; then
-    echo "  helm:           $(helm version --short 2>/dev/null || echo 'unknown')"
-else
-    echo "  helm:           NOT FOUND"
-fi
-
-if command -v ko &> /dev/null; then
-    echo "  ko:             $(ko version 2>/dev/null || echo 'unknown')"
-else
-    echo "  ko:             NOT FOUND"
-fi
-
-if command -v golangci-lint &> /dev/null; then
-    echo "  golangci-lint:  $(golangci-lint --version 2>/dev/null | head -1 | awk '{print $4}')"
-else
-    echo "  golangci-lint:  NOT FOUND"
-fi
-
-echo ""
-
-# Check for tools that may need manual installation
-MISSING_TOOLS=()
-if ! command -v tilt &> /dev/null; then
-    MISSING_TOOLS+=("tilt")
-fi
-if ! command -v ctlptl &> /dev/null; then
-    MISSING_TOOLS+=("ctlptl")
-fi
-
-if [[ ${#MISSING_TOOLS[@]} -gt 0 ]]; then
-    echo "Note: Some tools may need manual installation:"
-    for tool in "${MISSING_TOOLS[@]}"; do
-        echo "  - $tool (run: make tools-setup to install)"
-    done
-    echo ""
-fi
-
-echo "Run 'make tools-check' to verify all versions match .versions.yaml"
-echo ""
-'''
 
 [profile]
 common = '''
-# Common shell profile settings
 export GOPATH="${HOME}/go"
 export PATH="${GOPATH}/bin:${PATH}"
 '''
