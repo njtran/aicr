@@ -198,7 +198,7 @@ tools-setup: ## Setup development environment (installs all required tools). Use
 	@AUTO_MODE=$(AUTO_MODE) bash tools/setup-tools
 
 .PHONY: flox-manifest
-flox-manifest: ## Generate Flox manifest.toml from .versions.yaml (alternative to tools-setup)
+flox-manifest: ## Interactive Flox package installer. Use AUTO_MODE=true to skip prompts
 	@bash tools/generate-flox-manifest
 
 # =============================================================================
@@ -550,7 +550,7 @@ help-full: ## Displays commands grouped by category
 	@echo "\033[1m=== Tools ===\033[0m"
 	@echo "  make tools-check    Check tools and compare versions"
 	@echo "  make tools-setup    Install all development tools"
-	@echo "  make flox-manifest  Generate Flox manifest (alternative setup)"
+	@echo "  make flox-manifest  Interactive Flox package installer"
 	@echo ""
 	@echo "\033[1m=== Utilities ===\033[0m"
 	@echo "  make info           Print project info"

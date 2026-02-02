@@ -14,221 +14,260 @@
 # limitations under the License.
 
 # =============================================================================
-# Generate Flox manifest.toml from .versions.yaml
+# Interactive Flox Package Installation
 # =============================================================================
 #
-# This script generates a Flox manifest.toml that installs the same tool
-# versions defined in .versions.yaml, providing an alternative to the
-# make-based setup for developers who prefer Flox/Nix environments.
+# This script interactively installs development tools via Flox:
+#   1. Reads tool requirements from .versions.yaml
+#   2. Checks what's already installed via 'flox list'
+#   3. Searches for missing packages via 'flox search'
+#   4. Presents options to user and installs on confirmation
 #
 # Usage:
-#   ./tools/generate-flox-manifest
+#   ./tools/generate-flox-manifest           # Interactive mode
+#   AUTO_MODE=true ./tools/generate-flox-manifest  # Auto-select first result
 #   make flox-manifest
-#
-# After generation:
-#   flox activate
 #
 # =============================================================================
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ROOT_DIR="$(dirname "$SCRIPT_DIR")"
-VERSIONS_FILE="${ROOT_DIR}/.versions.yaml"
-MANIFEST_FILE="${ROOT_DIR}/.flox/env/manifest.toml"
+# shellcheck source=tools/common
+. "${SCRIPT_DIR}/common"
 
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
-NC='\033[0m'
+# Auto mode: skip prompts and auto-select first search result
+AUTO_MODE=${AUTO_MODE:-false}
 
-log_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
-log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
-log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
-
-# Check for yq
-if ! command -v yq &> /dev/null; then
-    log_error "yq is required but not installed. Install with: brew install yq"
-    exit 1
-fi
-
-# Check versions file exists
-if [[ ! -f "$VERSIONS_FILE" ]]; then
-    log_error "Versions file not found: $VERSIONS_FILE"
-    exit 1
-fi
-
-log_info "Reading versions from $VERSIONS_FILE"
-
-# Extract versions (strip 'v' prefix where present)
-GO_VERSION=$(yq '.languages.go' "$VERSIONS_FILE")
-KUBECTL_VERSION=$(yq '.testing_tools.kubectl' "$VERSIONS_FILE" | sed 's/^v//')
-KIND_VERSION=$(yq '.testing_tools.kind' "$VERSIONS_FILE" | sed 's/^v//')
-HELM_VERSION=$(yq '.testing_tools.helm' "$VERSIONS_FILE" | sed 's/^v//')
-KO_VERSION=$(yq '.build_tools.ko' "$VERSIONS_FILE" | sed 's/^v//')
-GORELEASER_VERSION=$(yq '.build_tools.goreleaser' "$VERSIONS_FILE" | sed 's/^v//')
-GOLANGCI_LINT_VERSION=$(yq '.linting.golangci_lint' "$VERSIONS_FILE" | sed 's/^v//')
-YAMLLINT_VERSION=$(yq '.linting.yamllint' "$VERSIONS_FILE" | sed 's/^v//')
-TILT_VERSION=$(yq '.testing_tools.tilt' "$VERSIONS_FILE" | sed 's/^v//')
-CTLPTL_VERSION=$(yq '.testing_tools.ctlptl' "$VERSIONS_FILE" | sed 's/^v//')
-
-# Create manifest directory if needed
-mkdir -p "$(dirname "$MANIFEST_FILE")"
-
-log_info "Generating Flox manifest: $MANIFEST_FILE"
-
-cat > "$MANIFEST_FILE" << EOF
 # =============================================================================
-# Flox Environment Manifest
+# Package Mapping
 # =============================================================================
-#
-# AUTO-GENERATED from .versions.yaml - DO NOT EDIT DIRECTLY
-#
-# Regenerate with: make flox-manifest
-#
-# This provides an alternative to 'make tools-setup' for developers who
-# prefer Flox/Nix-based development environments.
-#
-# Usage:
-#   flox activate    # Enter the development environment
-#   flox install     # Install packages without activating
-#
+# Format: "yaml_key|cli_command|nix_pkg_primary"
+# yaml_key: path in .versions.yaml (use _ for nested keys)
+# cli_command: command name to check if tool works
+# nix_pkg_primary: primary Nix package name to search
+
+PACKAGE_MAP=(
+    "languages.go|go|go"
+    "testing_tools.kubectl|kubectl|kubectl"
+    "testing_tools.kind|kind|kind"
+    "testing_tools.helm|helm|kubernetes-helm"
+    "testing_tools.tilt|tilt|tilt"
+    "testing_tools.ctlptl|ctlptl|ctlptl"
+    "build_tools.ko|ko|ko"
+    "build_tools.goreleaser|goreleaser|goreleaser"
+    "build_tools.crane|crane|crane"
+    "build_tools.git_cliff|git-cliff|git-cliff"
+    "linting.golangci_lint|golangci-lint|golangci-lint"
+    "linting.yamllint|yamllint|yamllint"
+    "linting.addlicense|addlicense|addlicense"
+    "linting.go_licenses|go-licenses|go-licenses"
+    "security_tools.grype|grype|grype"
+)
+
+# Additional utilities not in .versions.yaml but useful for development
+EXTRA_PACKAGES=(
+    "yq|yq|yq-go"
+    "jq|jq|jq"
+    "curl|curl|curl"
+)
+
+# =============================================================================
+# Functions
 # =============================================================================
 
-version = 1
+# Get installed packages as associative array-like output
+# Returns lines of: id|pkg-path|version
+get_installed_packages() {
+    # flox list output: "id: pkg-path (version)"
+    # Parse "go: go (1.25.5)" -> "go|go|1.25.5"
+    flox list 2>/dev/null | sed -n 's/^\([^:]*\): \([^ ]*\) (\([^)]*\))$/\1|\2|\3/p'
+}
 
-# Core development tools
-[install]
-# Language runtime
-go.pkg-path = "go"
+# Check if a package is installed by its ID
+# Args: $1 = package id to check, $2 = installed packages (newline-separated)
+is_installed() {
+    local pkg_id="$1"
+    local installed="$2"
+    echo "$installed" | grep -q "^${pkg_id}|"
+}
 
-# Kubernetes tools
-kubectl.pkg-path = "kubectl"
-kind.pkg-path = "kind"
-helm.pkg-path = "kubernetes-helm"
+# Search for a package and return results
+# Args: $1 = search query
+# Returns: lines of "pkg-path   description"
+search_package() {
+    local query="$1"
+    flox search "$query" 2>/dev/null | head -5
+}
 
-# Build tools
-ko.pkg-path = "ko"
-goreleaser.pkg-path = "goreleaser"
+# Prompt user to select a package from search results
+# Args: $1 = tool name, $2 = search results
+# Sets SELECTED_PKG global variable with the result
+# Returns: 0 if package selected, 1 if skipped/no results
+prompt_package_choice() {
+    local tool_name="$1"
+    local results="$2"
 
-# Linting
-golangci-lint.pkg-path = "golangci-lint"
-yamllint.pkg-path = "yamllint"
+    SELECTED_PKG=""
 
-# Development utilities
-yq.pkg-path = "yq-go"
-jq.pkg-path = "jq"
-curl.pkg-path = "curl"
+    # Convert results to array
+    local -a options=()
+    while IFS= read -r line; do
+        [[ -n "$line" ]] && options+=("$line")
+    done <<< "$results"
 
-# Container tools (tilt and ctlptl may need manual install)
-# tilt.pkg-path = "tilt"  # May not be in nixpkgs
+    if [[ ${#options[@]} -eq 0 ]]; then
+        return 1
+    fi
 
-[vars]
-# Project-specific environment variables
-EIDOS_DEV = "true"
+    # In AUTO_MODE, auto-select first result
+    if [[ "$AUTO_MODE" == "true" ]]; then
+        SELECTED_PKG=$(echo "${options[0]}" | awk '{print $1}')
+        log_info "AUTO_MODE: selecting '$SELECTED_PKG' for $tool_name"
+        return 0
+    fi
 
-[hook]
-on-activate = '''
-# =============================================================================
-# Flox Environment Activation Hook
-# =============================================================================
-
-echo ""
-echo "Eidos Development Environment (Flox)"
-echo "====================================="
-echo ""
-
-# Version information from .versions.yaml
-echo "Configured versions (.versions.yaml):"
-echo "  Go:             ${GO_VERSION}"
-echo "  kubectl:        ${KUBECTL_VERSION}"
-echo "  kind:           ${KIND_VERSION}"
-echo "  Helm:           ${HELM_VERSION}"
-echo "  ko:             ${KO_VERSION}"
-echo "  goreleaser:     ${GORELEASER_VERSION}"
-echo "  golangci-lint:  ${GOLANGCI_LINT_VERSION}"
-echo "  yamllint:       ${YAMLLINT_VERSION}"
-echo ""
-
-# Verify key tools are available
-echo "Installed tools:"
-if command -v go &> /dev/null; then
-    echo "  go:             \$(go version | awk '{print \$3}')"
-else
-    echo "  go:             NOT FOUND"
-fi
-
-if command -v kubectl &> /dev/null; then
-    echo "  kubectl:        \$(kubectl version --client -o json 2>/dev/null | jq -r '.clientVersion.gitVersion' 2>/dev/null || echo 'unknown')"
-else
-    echo "  kubectl:        NOT FOUND"
-fi
-
-if command -v helm &> /dev/null; then
-    echo "  helm:           \$(helm version --short 2>/dev/null || echo 'unknown')"
-else
-    echo "  helm:           NOT FOUND"
-fi
-
-if command -v ko &> /dev/null; then
-    echo "  ko:             \$(ko version 2>/dev/null || echo 'unknown')"
-else
-    echo "  ko:             NOT FOUND"
-fi
-
-if command -v golangci-lint &> /dev/null; then
-    echo "  golangci-lint:  \$(golangci-lint --version 2>/dev/null | head -1 | awk '{print \$4}')"
-else
-    echo "  golangci-lint:  NOT FOUND"
-fi
-
-echo ""
-
-# Check for tools that may need manual installation
-MISSING_TOOLS=()
-if ! command -v tilt &> /dev/null; then
-    MISSING_TOOLS+=("tilt")
-fi
-if ! command -v ctlptl &> /dev/null; then
-    MISSING_TOOLS+=("ctlptl")
-fi
-
-if [[ \${#MISSING_TOOLS[@]} -gt 0 ]]; then
-    echo "Note: Some tools may need manual installation:"
-    for tool in "\${MISSING_TOOLS[@]}"; do
-        echo "  - \$tool (run: make tools-setup to install)"
-    done
     echo ""
-fi
+    echo "Select package for '$tool_name':"
+    local i=1
+    for opt in "${options[@]}"; do
+        printf "  %d) %s\n" "$i" "$opt"
+        ((i++))
+    done
+    printf "  s) Skip this package\n"
+    echo ""
 
-echo "Run 'make tools-check' to verify all versions match .versions.yaml"
-echo ""
-'''
+    while true; do
+        printf "Enter choice [1-%d, s to skip]: " "${#options[@]}"
+        read -r choice
 
-[profile]
-common = '''
-# Common shell profile settings
-export GOPATH="\${HOME}/go"
-export PATH="\${GOPATH}/bin:\${PATH}"
-'''
-EOF
+        if [[ "$choice" == "s" || "$choice" == "S" ]]; then
+            return 1
+        fi
 
-log_info "Manifest generated successfully"
-echo ""
-echo "Expected versions (from .versions.yaml):"
-echo "  Go:             ${GO_VERSION}"
-echo "  kubectl:        ${KUBECTL_VERSION}"
-echo "  kind:           ${KIND_VERSION}"
-echo "  Helm:           ${HELM_VERSION}"
-echo "  ko:             ${KO_VERSION}"
-echo "  goreleaser:     ${GORELEASER_VERSION}"
-echo "  golangci-lint:  ${GOLANGCI_LINT_VERSION}"
-echo "  yamllint:       ${YAMLLINT_VERSION}"
-echo "  tilt:           ${TILT_VERSION}"
-echo "  ctlptl:         ${CTLPTL_VERSION}"
-echo ""
-log_warn "Note: Flox/Nix may install slightly different patch versions."
-log_warn "Some tools (tilt, ctlptl) may need 'make tools-setup' for exact versions."
-echo ""
-log_info "To use: flox activate"
+        if [[ "$choice" =~ ^[0-9]+$ ]] && [[ "$choice" -ge 1 ]] && [[ "$choice" -le "${#options[@]}" ]]; then
+            local selected="${options[$((choice-1))]}"
+            SELECTED_PKG=$(echo "$selected" | awk '{print $1}')
+            return 0
+        fi
+
+        echo "Invalid choice. Please enter 1-${#options[@]} or 's' to skip."
+    done
+}
+
+# Install a package with explicit ID
+# Args: $1 = package id, $2 = pkg-path
+install_package() {
+    local pkg_id="$1"
+    local pkg_path="$2"
+
+    log_info "Installing $pkg_id ($pkg_path)..."
+    if flox install -i "$pkg_id" "$pkg_path"; then
+        log_success "Installed $pkg_id"
+        return 0
+    else
+        log_error "Failed to install $pkg_id"
+        return 1
+    fi
+}
+
+# Process a single package mapping
+# Args: $1 = mapping string, $2 = installed packages
+process_package() {
+    local mapping="$1"
+    local installed="$2"
+
+    IFS='|' read -r yaml_key cli_cmd nix_pkg <<< "$mapping"
+
+    # Check if already installed
+    if is_installed "$cli_cmd" "$installed"; then
+        # Get version from installed list
+        local version
+        version=$(echo "$installed" | grep "^${cli_cmd}|" | cut -d'|' -f3)
+        log_success "$cli_cmd already installed ($version)"
+        return 0
+    fi
+
+    log_info "Searching for $cli_cmd (package: $nix_pkg)..."
+
+    # Search for package
+    local results
+    results=$(search_package "$nix_pkg")
+
+    if [[ -z "$results" ]]; then
+        log_warning "$cli_cmd: no results for '$nix_pkg'. Try 'flox search <query>' manually."
+        return 1
+    fi
+
+    # Prompt user (or auto-select in AUTO_MODE)
+    if prompt_package_choice "$cli_cmd" "$results"; then
+        install_package "$cli_cmd" "$SELECTED_PKG"
+    else
+        log_info "Skipped $cli_cmd"
+    fi
+}
+
+# =============================================================================
+# Main
+# =============================================================================
+
+main() {
+    log_info "Flox Package Installer for Eidos Development"
+    echo ""
+
+    # Check for flox
+    if ! command -v flox &> /dev/null; then
+        log_error "flox is not installed. Install from: https://flox.dev"
+        exit 1
+    fi
+
+    # Get currently installed packages
+    log_info "Checking installed packages..."
+    local installed
+    installed=$(get_installed_packages)
+
+    if [[ -n "$installed" ]]; then
+        local count
+        count=$(echo "$installed" | wc -l | tr -d ' ')
+        log_info "Found $count installed packages"
+    else
+        log_info "No packages currently installed"
+    fi
+
+    echo ""
+
+    # Process packages from .versions.yaml
+    log_info "Processing packages from .versions.yaml..."
+    echo ""
+
+    local failed=0
+    for mapping in "${PACKAGE_MAP[@]}"; do
+        if ! process_package "$mapping" "$installed"; then
+            ((failed++)) || true
+        fi
+        # Refresh installed list after each install for accurate detection
+        installed=$(get_installed_packages)
+    done
+
+    echo ""
+    log_info "Processing extra utility packages..."
+    echo ""
+
+    for mapping in "${EXTRA_PACKAGES[@]}"; do
+        if ! process_package "$mapping" "$installed"; then
+            ((failed++)) || true
+        fi
+        installed=$(get_installed_packages)
+    done
+
+    echo ""
+    if [[ $failed -gt 0 ]]; then
+        log_warning "$failed package(s) were skipped or failed to install"
+    fi
+
+    log_success "Done! Run 'flox activate' to use the environment."
+    echo ""
+    log_info "Verify with: make tools-check"
+}
+
+main "$@"
