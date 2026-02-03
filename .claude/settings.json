@@ -18,7 +18,8 @@
       "WebFetch(domain:golangci-lint.run)",
       "WebFetch(domain:goreleaser.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
-      "WebSearch"
+      "WebSearch",
+      "WebFetch(domain:gitlab-master.nvidia.com)"
     ]
   }
 }
