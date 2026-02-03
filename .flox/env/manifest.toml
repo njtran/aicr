@@ -41,7 +41,7 @@ grype.pkg-group = "grype"
 
 # Build Helm 4 from source (not yet in nixpkgs)
 # https://github.com/NixOS/nixpkgs/pull/461007
-helm.flake = "git+file:.?dir=.flox/flakes/helm#helm"
+helm.flake = "gitlab:cmcdermott/flox?host=gitlab-master.nvidia.com&dir=flakes/helm/versions/v4.1.0"
 
 jq.pkg-path = "jq"
 

@@ -52,7 +52,7 @@
         "version": "0"
       },
       "helm": {
-        "flake": "git+file:.?dir=.flox/flakes/helm#helm"
+        "flake": "gitlab:cmcdermott/flox?host=gitlab-master.nvidia.com&dir=flakes/helm/versions/v4.1.0"
       },
       "jq": {
         "pkg-path": "jq"
@@ -1638,35 +1638,32 @@
     {
       "attr_path": "curl",
       "broken": false,
-      "derivation": "/nix/store/nyy2cz7v19dc6dscni1x9wpa2wf4ribi-curl-8.17.0.drv",
+      "derivation": "/nix/store/vn7qyigb9aqbzk93v3yjz3zdacbp48vw-curl-8.17.0.drv",
       "description": "Command line tool for transferring files with URL syntax",
       "install_id": "curl",
       "license": "curl",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=1412caf7bf9e660f2f962917c14b1ea1c3bc695e",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=62c8382960464ceb98ea593cb8321a2cf8f9e3e5",
       "name": "curl-8.17.0",
       "pname": "curl",
-      "rev": "1412caf7bf9e660f2f962917c14b1ea1c3bc695e",
-      "rev_count": 927018,
-      "rev_date": "2026-01-13T12:03:11Z",
-      "scrape_date": "2026-01-16T03:15:54.144263Z",
+      "rev": "62c8382960464ceb98ea593cb8321a2cf8f9e3e5",
+      "rev_count": 937308,
+      "rev_date": "2026-01-30T16:06:07Z",
+      "scrape_date": "2026-02-02T04:36:41.500382Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
       "version": "8.17.0",
       "outputs_to_install": [
         "bin",
-        "bin",
-        "man",
         "man"
       ],
       "outputs": {
-        "bin": "/nix/store/gdlvy90b4ypf3bwqqcnzp2q02njvncm7-curl-8.17.0-bin",
-        "dev": "/nix/store/lnva9c0dca126n9gqfr8j6pdjgsbgriw-curl-8.17.0-dev",
-        "devdoc": "/nix/store/zdqkjdlfxk11sbc8ldil74d39jsi00sv-curl-8.17.0-devdoc",
-        "man": "/nix/store/v76fsj7w1984j9aksxgn7hbgbg68b1sd-curl-8.17.0-man",
-        "out": "/nix/store/j5qs5ilbgpffcrvcqrc70aj8i5mxhj61-curl-8.17.0"
+        "bin": "/nix/store/qncd2qavd8nj797izhqzyzz5q9cr5bwx-curl-8.17.0-bin",
+        "dev": "/nix/store/27hnypizfhndg47s81v9gvc9ywsiqq5p-curl-8.17.0-dev",
+        "devdoc": "/nix/store/izi1l0h196fyaf7w06wqziq02m43acij-curl-8.17.0-devdoc",
+        "man": "/nix/store/2swlvcnn1xrsanyd4fc8mdlmx6c216dd-curl-8.17.0-man",
+        "out": "/nix/store/vzv2n6g3g6ynxdzflh4s5crn6px9b0wb-curl-8.17.0"
       },
       "system": "aarch64-darwin",
       "group": "toplevel",
@@ -1675,19 +1672,18 @@
     {
       "attr_path": "curl",
       "broken": false,
-      "derivation": "/nix/store/080k2za7h3jrlih0s7kh6kmmjksxvwcd-curl-8.17.0.drv",
+      "derivation": "/nix/store/sbj1ds2n743q4zhfccjaylg7jvjp9q9n-curl-8.17.0.drv",
       "description": "Command line tool for transferring files with URL syntax",
       "install_id": "curl",
       "license": "curl",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=1412caf7bf9e660f2f962917c14b1ea1c3bc695e",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=62c8382960464ceb98ea593cb8321a2cf8f9e3e5",
       "name": "curl-8.17.0",
       "pname": "curl",
-      "rev": "1412caf7bf9e660f2f962917c14b1ea1c3bc695e",
-      "rev_count": 927018,
-      "rev_date": "2026-01-13T12:03:11Z",
-      "scrape_date": "2026-01-16T03:51:11.301155Z",
+      "rev": "62c8382960464ceb98ea593cb8321a2cf8f9e3e5",
+      "rev_count": 937308,
+      "rev_date": "2026-01-30T16:06:07Z",
+      "scrape_date": "2026-02-02T05:07:28.661852Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -1699,12 +1695,12 @@
         "man"
       ],
       "outputs": {
-        "bin": "/nix/store/pn5kixc55gmkdpbb3i5r1h0zgjdnwn7x-curl-8.17.0-bin",
-        "debug": "/nix/store/k2x0q53j1r0qrfl3796cjmmn6r5pl0pc-curl-8.17.0-debug",
-        "dev": "/nix/store/jviasb44hibgh09829gbmbssbz2jjnhz-curl-8.17.0-dev",
-        "devdoc": "/nix/store/xyqmwjp9sg7h6yk3bj8z0hbvp62a7412-curl-8.17.0-devdoc",
-        "man": "/nix/store/ghjafvaw2wihkq5if1vy4x5bwj3l3x7w-curl-8.17.0-man",
-        "out": "/nix/store/dlzv7s6ggdqpi2l90g9wqsj7rh26pb0r-curl-8.17.0"
+        "bin": "/nix/store/wqz5jf32ywajllzfry6gjxhddbh21lvs-curl-8.17.0-bin",
+        "debug": "/nix/store/vwgx2lvkk8kygx6006a81qhb48f9hn7f-curl-8.17.0-debug",
+        "dev": "/nix/store/638hqfczwic54cln0cavh38l1a140ij3-curl-8.17.0-dev",
+        "devdoc": "/nix/store/gl74x82b8xiprhpqnw86rvha06gjzk8v-curl-8.17.0-devdoc",
+        "man": "/nix/store/9bpk7v03yq152wvf5rbv7pr7f5mvj7xp-curl-8.17.0-man",
+        "out": "/nix/store/7rls1f8815qd0b6lgicc53jwl7qs3fa2-curl-8.17.0"
       },
       "system": "aarch64-linux",
       "group": "toplevel",
@@ -1713,19 +1709,18 @@
     {
       "attr_path": "curl",
       "broken": false,
-      "derivation": "/nix/store/x9jn0j6w3nwknf7d2rfa9rrpxp0nmfxh-curl-8.17.0.drv",
+      "derivation": "/nix/store/7f4kfgr9bwbzm3xzah75z0qii7gramff-curl-8.17.0.drv",
       "description": "Command line tool for transferring files with URL syntax",
       "install_id": "curl",
       "license": "curl",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=1412caf7bf9e660f2f962917c14b1ea1c3bc695e",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=62c8382960464ceb98ea593cb8321a2cf8f9e3e5",
       "name": "curl-8.17.0",
       "pname": "curl",
-      "rev": "1412caf7bf9e660f2f962917c14b1ea1c3bc695e",
-      "rev_count": 927018,
-      "rev_date": "2026-01-13T12:03:11Z",
-      "scrape_date": "2026-01-16T04:22:53.136403Z",
+      "rev": "62c8382960464ceb98ea593cb8321a2cf8f9e3e5",
+      "rev_count": 937308,
+      "rev_date": "2026-01-30T16:06:07Z",
+      "scrape_date": "2026-02-02T05:38:09.268773Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -1735,11 +1730,11 @@
         "man"
       ],
       "outputs": {
-        "bin": "/nix/store/swwbf9z6y6naa0p98yk29cw8hvdl0597-curl-8.17.0-bin",
-        "dev": "/nix/store/zzircp96p8v4xpl118zh87jmjyd4vzry-curl-8.17.0-dev",
-        "devdoc": "/nix/store/jxrqijqd7i7zir6pxr7mf9nx5r7n854h-curl-8.17.0-devdoc",
-        "man": "/nix/store/ffci3204mhijf9zjk5fmqcm7nb5yi8gn-curl-8.17.0-man",
-        "out": "/nix/store/d1gac0xciwjbf1wvmnx6d8myg3k738kb-curl-8.17.0"
+        "bin": "/nix/store/9392lab8kdzr8ch1g2lfh63fm3gvkg77-curl-8.17.0-bin",
+        "dev": "/nix/store/k4vydyjfpc7j04dldqlmnc688xfzjlvv-curl-8.17.0-dev",
+        "devdoc": "/nix/store/h7rj1lxpqbfpd6l42rfbpby4zb1pxsjx-curl-8.17.0-devdoc",
+        "man": "/nix/store/1x5mhbmgag1x0m1iqg793w3nkpa879qa-curl-8.17.0-man",
+        "out": "/nix/store/073hhh572b5vjk02rdyd68rqip6zfdc5-curl-8.17.0"
       },
       "system": "x86_64-darwin",
       "group": "toplevel",
@@ -1748,19 +1743,18 @@
     {
       "attr_path": "curl",
       "broken": false,
-      "derivation": "/nix/store/jk2nc1d5k7f6k1c6aiwkl562ra18h2mv-curl-8.17.0.drv",
+      "derivation": "/nix/store/a1kpbbk1lnnaw2gl5pffs92hxm54mjpm-curl-8.17.0.drv",
       "description": "Command line tool for transferring files with URL syntax",
       "install_id": "curl",
       "license": "curl",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=1412caf7bf9e660f2f962917c14b1ea1c3bc695e",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=62c8382960464ceb98ea593cb8321a2cf8f9e3e5",
       "name": "curl-8.17.0",
       "pname": "curl",
-      "rev": "1412caf7bf9e660f2f962917c14b1ea1c3bc695e",
-      "rev_count": 927018,
-      "rev_date": "2026-01-13T12:03:11Z",
-      "scrape_date": "2026-01-16T04:59:41.305687Z",
+      "rev": "62c8382960464ceb98ea593cb8321a2cf8f9e3e5",
+      "rev_count": 937308,
+      "rev_date": "2026-01-30T16:06:07Z",
+      "scrape_date": "2026-02-02T06:12:36.728327Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -1772,12 +1766,12 @@
         "man"
       ],
       "outputs": {
-        "bin": "/nix/store/cr9yz1bdfs9vj9cpr85ihrkgzgawgcwa-curl-8.17.0-bin",
-        "debug": "/nix/store/0wddkz9q83zzjzrkvirk0hdx5ql5kjf7-curl-8.17.0-debug",
-        "dev": "/nix/store/wflnb8fxmq4lqx3ca91hlpv95vrqkv51-curl-8.17.0-dev",
-        "devdoc": "/nix/store/iswxlh1qlz8087fx02dn88bk2sg4j4bq-curl-8.17.0-devdoc",
-        "man": "/nix/store/c4ghf47ifi52acyd5kvmfjgmlcdlxvri-curl-8.17.0-man",
-        "out": "/nix/store/0apq92vpf3f3kll8vl9nhjq1gaaffibk-curl-8.17.0"
+        "bin": "/nix/store/jqfr3p49g3lch84y45jfzw9fshlv8jyp-curl-8.17.0-bin",
+        "debug": "/nix/store/lhdva5pd84cx2bm7gymrm7x75m95s3gb-curl-8.17.0-debug",
+        "dev": "/nix/store/gy73p60881n9nagq7grffjgy4ycw9a85-curl-8.17.0-dev",
+        "devdoc": "/nix/store/74hjnnn67f1ax4mkx4nwbcxaih6k5hrv-curl-8.17.0-devdoc",
+        "man": "/nix/store/msaigk8gy4rikyxbxiqksh8njd5dx13h-curl-8.17.0-man",
+        "out": "/nix/store/8ylzjm58ghiq60vklfy58j14sgryjjzw-curl-8.17.0"
       },
       "system": "x86_64-linux",
       "group": "toplevel",
@@ -1786,19 +1780,18 @@
     {
       "attr_path": "jq",
       "broken": false,
-      "derivation": "/nix/store/xh7sg4v2x4d44yzvmx9zcr71gn7z6b03-jq-1.8.1.drv",
+      "derivation": "/nix/store/44r4r3dsjbhqmddw2vvxn9jra5sl12cq-jq-1.8.1.drv",
       "description": "Lightweight and flexible command-line JSON processor",
       "install_id": "jq",
       "license": "MIT",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=1412caf7bf9e660f2f962917c14b1ea1c3bc695e",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=62c8382960464ceb98ea593cb8321a2cf8f9e3e5",
       "name": "jq-1.8.1",
       "pname": "jq",
-      "rev": "1412caf7bf9e660f2f962917c14b1ea1c3bc695e",
-      "rev_count": 927018,
-      "rev_date": "2026-01-13T12:03:11Z",
-      "scrape_date": "2026-01-16T03:16:09.655841Z",
+      "rev": "62c8382960464ceb98ea593cb8321a2cf8f9e3e5",
+      "rev_count": 937308,
+      "rev_date": "2026-01-30T16:06:07Z",
+      "scrape_date": "2026-02-02T04:36:57.174145Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -1808,11 +1801,11 @@
         "man"
       ],
       "outputs": {
-        "bin": "/nix/store/9rm6fm3zq1jq8rgsx528cw8wkmfya2gf-jq-1.8.1-bin",
-        "dev": "/nix/store/5camppj4hz2mgkdbxs0kr6nvh6qa65wf-jq-1.8.1-dev",
-        "doc": "/nix/store/lak094rhhxlaj1qycadmxyfphgjadj5r-jq-1.8.1-doc",
-        "man": "/nix/store/cv999saj62xhq7xv5i7q6944vljykfmw-jq-1.8.1-man",
-        "out": "/nix/store/g371yvjasdr552v98p5kav7n35s1dfib-jq-1.8.1"
+        "bin": "/nix/store/qjs0qndyz1g97rsc1zp4cd692y5iph64-jq-1.8.1-bin",
+        "dev": "/nix/store/bhryp10d5w5h9rsav5k9m9jb55z26bsl-jq-1.8.1-dev",
+        "doc": "/nix/store/238sn0gg3i3i9v6kgx4g1k6b19frzy49-jq-1.8.1-doc",
+        "man": "/nix/store/jlpyybc7pdh4gk17dc266d6a1szm7dk6-jq-1.8.1-man",
+        "out": "/nix/store/n64h0247s3674kry90l6kszx06zyrgfn-jq-1.8.1"
       },
       "system": "aarch64-darwin",
       "group": "toplevel",
@@ -1821,19 +1814,18 @@
     {
       "attr_path": "jq",
       "broken": false,
-      "derivation": "/nix/store/900w59hvyx6q26igzlgk2pn2wjx0fsss-jq-1.8.1.drv",
+      "derivation": "/nix/store/gcqa6ab6iifng1rpfs5bb34nx9czg705-jq-1.8.1.drv",
       "description": "Lightweight and flexible command-line JSON processor",
       "install_id": "jq",
       "license": "MIT",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=1412caf7bf9e660f2f962917c14b1ea1c3bc695e",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=62c8382960464ceb98ea593cb8321a2cf8f9e3e5",
       "name": "jq-1.8.1",
       "pname": "jq",
-      "rev": "1412caf7bf9e660f2f962917c14b1ea1c3bc695e",
-      "rev_count": 927018,
-      "rev_date": "2026-01-13T12:03:11Z",
-      "scrape_date": "2026-01-16T03:51:32.292659Z",
+      "rev": "62c8382960464ceb98ea593cb8321a2cf8f9e3e5",
+      "rev_count": 937308,
+      "rev_date": "2026-01-30T16:06:07Z",
+      "scrape_date": "2026-02-02T05:07:49.085646Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -1844,11 +1836,11 @@
         "man"
       ],
       "outputs": {
-        "bin": "/nix/store/m8qv4g54q3jmjb8i33v9lljcwhydx2vd-jq-1.8.1-bin",
-        "dev": "/nix/store/5ykn83b3hhvnnq0p5vqgcrzihrl9wpsl-jq-1.8.1-dev",
-        "doc": "/nix/store/37ypy1595g6rj3cymh1mpk2b25fx40g7-jq-1.8.1-doc",
-        "man": "/nix/store/9x2457g76jikfy7xq4mjqwzl8iz3zvxj-jq-1.8.1-man",
-        "out": "/nix/store/16lg603jzppwjanlakcak1ais69mkd03-jq-1.8.1"
+        "bin": "/nix/store/c1qm5fsn6qbl09xdjx649vifabypyywd-jq-1.8.1-bin",
+        "dev": "/nix/store/2sy4y09ddbi64pbg4is078110z70jsdw-jq-1.8.1-dev",
+        "doc": "/nix/store/vx81xggapqwdd2l64mmxrkbafih461jc-jq-1.8.1-doc",
+        "man": "/nix/store/2pjwv0ab8nilrg1lvjazf9y9w6g6pk5y-jq-1.8.1-man",
+        "out": "/nix/store/cfhajjz1k7gf31krbj18q9acb54xp5z9-jq-1.8.1"
       },
       "system": "aarch64-linux",
       "group": "toplevel",
@@ -1857,19 +1849,18 @@
     {
       "attr_path": "jq",
       "broken": false,
-      "derivation": "/nix/store/cajf8n8zpw65sd9ch7av6lwwb2qkvx8v-jq-1.8.1.drv",
+      "derivation": "/nix/store/9bq94zr10wpaijpz606hwnkk08brv1md-jq-1.8.1.drv",
       "description": "Lightweight and flexible command-line JSON processor",
       "install_id": "jq",
       "license": "MIT",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=1412caf7bf9e660f2f962917c14b1ea1c3bc695e",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=62c8382960464ceb98ea593cb8321a2cf8f9e3e5",
       "name": "jq-1.8.1",
       "pname": "jq",
-      "rev": "1412caf7bf9e660f2f962917c14b1ea1c3bc695e",
-      "rev_count": 927018,
-      "rev_date": "2026-01-13T12:03:11Z",
-      "scrape_date": "2026-01-16T04:23:08.689973Z",
+      "rev": "62c8382960464ceb98ea593cb8321a2cf8f9e3e5",
+      "rev_count": 937308,
+      "rev_date": "2026-01-30T16:06:07Z",
+      "scrape_date": "2026-02-02T05:38:25.538170Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -1879,11 +1870,11 @@
         "man"
       ],
       "outputs": {
-        "bin": "/nix/store/kkb17whpkdrmn9g3gk7y6l69vipxsw0i-jq-1.8.1-bin",
-        "dev": "/nix/store/lypnqs272644l8ff6wfji9rg5jw10v7h-jq-1.8.1-dev",
-        "doc": "/nix/store/nyw97c4pywfcqqap5hyk9xjghczlbshl-jq-1.8.1-doc",
-        "man": "/nix/store/iwr61wi83kflqvz8j5nf7ridaqq6nh2w-jq-1.8.1-man",
-        "out": "/nix/store/ri930a557685c64bdh88a5031i7hx3vy-jq-1.8.1"
+        "bin": "/nix/store/51343hgchh7by4l8r1g244ma05ny3x0b-jq-1.8.1-bin",
+        "dev": "/nix/store/pp2hrljvalrrwyxh7is69nnlmxb2m7lk-jq-1.8.1-dev",
+        "doc": "/nix/store/h05xaf7fsasgp8cpyar2195cc8lbgih8-jq-1.8.1-doc",
+        "man": "/nix/store/vx840ik1sj1h8fhqwa40aglvrgpa0r18-jq-1.8.1-man",
+        "out": "/nix/store/bmg2xfw86wavg7fm062nyf6v48xzxh0j-jq-1.8.1"
       },
       "system": "x86_64-darwin",
       "group": "toplevel",
@@ -1892,19 +1883,18 @@
     {
       "attr_path": "jq",
       "broken": false,
-      "derivation": "/nix/store/ig0anfgqf7v924r7djvvp8vi46r74g5k-jq-1.8.1.drv",
+      "derivation": "/nix/store/ni2zx8nd9ja3ar6ar568r8l4wy80knn2-jq-1.8.1.drv",
       "description": "Lightweight and flexible command-line JSON processor",
       "install_id": "jq",
       "license": "MIT",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=1412caf7bf9e660f2f962917c14b1ea1c3bc695e",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=62c8382960464ceb98ea593cb8321a2cf8f9e3e5",
       "name": "jq-1.8.1",
       "pname": "jq",
-      "rev": "1412caf7bf9e660f2f962917c14b1ea1c3bc695e",
-      "rev_count": 927018,
-      "rev_date": "2026-01-13T12:03:11Z",
-      "scrape_date": "2026-01-16T05:00:03.451331Z",
+      "rev": "62c8382960464ceb98ea593cb8321a2cf8f9e3e5",
+      "rev_count": 937308,
+      "rev_date": "2026-01-30T16:06:07Z",
+      "scrape_date": "2026-02-02T06:12:57.905376Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -1915,11 +1905,11 @@
         "man"
       ],
       "outputs": {
-        "bin": "/nix/store/zssasryipb2x4gk2ahzacl4mvvcmk48j-jq-1.8.1-bin",
-        "dev": "/nix/store/rmxxm5jnxq93kvkhbr2b3hzj6v3ldp8z-jq-1.8.1-dev",
-        "doc": "/nix/store/mkhfvc69grlky3iblibkw9wcc12jcdqq-jq-1.8.1-doc",
-        "man": "/nix/store/7d4pv1iymyqk2lykwj1ydml3rjhc6gl3-jq-1.8.1-man",
-        "out": "/nix/store/807g765zgpmp1c8fm5y40rw2gbr1k6dk-jq-1.8.1"
+        "bin": "/nix/store/qnaw7i777j52fpgbl5pgmzkq85znp083-jq-1.8.1-bin",
+        "dev": "/nix/store/d73i1fvhrqms0sbfrvqaynsr8iva216v-jq-1.8.1-dev",
+        "doc": "/nix/store/3ynrp4ypwv1g1jgsk638443p8lpd9g8f-jq-1.8.1-doc",
+        "man": "/nix/store/6mh88qsh57ivh31c5nqxc43n0hv9xhbk-jq-1.8.1-man",
+        "out": "/nix/store/fgsvqffyvcpjqs093wwf2d6dzxnmnqnv-jq-1.8.1"
       },
       "system": "x86_64-linux",
       "group": "toplevel",
@@ -1928,19 +1918,18 @@
     {
       "attr_path": "yq-go",
       "broken": false,
-      "derivation": "/nix/store/6626pjd67n17fs71mlc6sy58kvbv7l5c-yq-go-4.50.1.drv",
+      "derivation": "/nix/store/rhdy3sas9pvkpwfa04kdf48hrriz7ag7-yq-go-4.50.1.drv",
       "description": "Portable command-line YAML processor",
       "install_id": "yq",
       "license": "[ MIT ]",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=1412caf7bf9e660f2f962917c14b1ea1c3bc695e",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=62c8382960464ceb98ea593cb8321a2cf8f9e3e5",
       "name": "yq-go-4.50.1",
       "pname": "yq-go",
-      "rev": "1412caf7bf9e660f2f962917c14b1ea1c3bc695e",
-      "rev_count": 927018,
-      "rev_date": "2026-01-13T12:03:11Z",
-      "scrape_date": "2026-01-16T03:18:35.602242Z",
+      "rev": "62c8382960464ceb98ea593cb8321a2cf8f9e3e5",
+      "rev_count": 937308,
+      "rev_date": "2026-01-30T16:06:07Z",
+      "scrape_date": "2026-02-02T04:39:19.074381Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -1949,7 +1938,7 @@
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/ihnllpwbhrpj6wfgmx4cqhv5qjm117fa-yq-go-4.50.1"
+        "out": "/nix/store/97s2svj2zrsfmwgpdxqrq99n3n40plyd-yq-go-4.50.1"
       },
       "system": "aarch64-darwin",
       "group": "toplevel",
@@ -1958,19 +1947,18 @@
     {
       "attr_path": "yq-go",
       "broken": false,
-      "derivation": "/nix/store/gwkw8ic7yycfnbgphncym39cfvznrdw8-yq-go-4.50.1.drv",
+      "derivation": "/nix/store/1vrk0b8qyxcizxw1jqff2k338fplxzvq-yq-go-4.50.1.drv",
       "description": "Portable command-line YAML processor",
       "install_id": "yq",
       "license": "[ MIT ]",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=1412caf7bf9e660f2f962917c14b1ea1c3bc695e",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=62c8382960464ceb98ea593cb8321a2cf8f9e3e5",
       "name": "yq-go-4.50.1",
       "pname": "yq-go",
-      "rev": "1412caf7bf9e660f2f962917c14b1ea1c3bc695e",
-      "rev_count": 927018,
-      "rev_date": "2026-01-13T12:03:11Z",
-      "scrape_date": "2026-01-16T03:54:31.492458Z",
+      "rev": "62c8382960464ceb98ea593cb8321a2cf8f9e3e5",
+      "rev_count": 937308,
+      "rev_date": "2026-01-30T16:06:07Z",
+      "scrape_date": "2026-02-02T05:11:11.864457Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -1979,7 +1967,7 @@
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/n9qa1n3chinld0an3mghq2fiwg341csq-yq-go-4.50.1"
+        "out": "/nix/store/4vfppipshrf3b604p3nqy6xy34n7hm1r-yq-go-4.50.1"
       },
       "system": "aarch64-linux",
       "group": "toplevel",
@@ -1988,19 +1976,18 @@
     {
       "attr_path": "yq-go",
       "broken": false,
-      "derivation": "/nix/store/b3jnywjvglxzdwwiv91i94f29h2l4ydc-yq-go-4.50.1.drv",
+      "derivation": "/nix/store/87p67wnpqqhlb9w89cpxsm9kqfyjbi3j-yq-go-4.50.1.drv",
       "description": "Portable command-line YAML processor",
       "install_id": "yq",
       "license": "[ MIT ]",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=1412caf7bf9e660f2f962917c14b1ea1c3bc695e",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=62c8382960464ceb98ea593cb8321a2cf8f9e3e5",
       "name": "yq-go-4.50.1",
       "pname": "yq-go",
-      "rev": "1412caf7bf9e660f2f962917c14b1ea1c3bc695e",
-      "rev_count": 927018,
-      "rev_date": "2026-01-13T12:03:11Z",
-      "scrape_date": "2026-01-16T04:25:23.895602Z",
+      "rev": "62c8382960464ceb98ea593cb8321a2cf8f9e3e5",
+      "rev_count": 937308,
+      "rev_date": "2026-01-30T16:06:07Z",
+      "scrape_date": "2026-02-02T05:40:56.505112Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -2009,7 +1996,7 @@
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/i37722ivy7914srsrm3j1r8h7z9jlck4-yq-go-4.50.1"
+        "out": "/nix/store/z3r8ynh5vwm66vf7i2czc164rwvch7cz-yq-go-4.50.1"
       },
       "system": "x86_64-darwin",
       "group": "toplevel",
@@ -2018,19 +2005,18 @@
     {
       "attr_path": "yq-go",
       "broken": false,
-      "derivation": "/nix/store/pzmzwd6d8mxd264s57d97yz0wznnm5yh-yq-go-4.50.1.drv",
+      "derivation": "/nix/store/lcj3kasyspdm0wjy6xr8j6ic0x7j5gdv-yq-go-4.50.1.drv",
       "description": "Portable command-line YAML processor",
       "install_id": "yq",
       "license": "[ MIT ]",
-      "locked_url": "https://github.com/flox/nixpkgs?rev=1412caf7bf9e660f2f962917c14b1ea1c3bc695e",
+      "locked_url": "https://github.com/flox/nixpkgs?rev=62c8382960464ceb98ea593cb8321a2cf8f9e3e5",
       "name": "yq-go-4.50.1",
       "pname": "yq-go",
-      "rev": "1412caf7bf9e660f2f962917c14b1ea1c3bc695e",
-      "rev_count": 927018,
-      "rev_date": "2026-01-13T12:03:11Z",
-      "scrape_date": "2026-01-16T05:03:13.685810Z",
+      "rev": "62c8382960464ceb98ea593cb8321a2cf8f9e3e5",
+      "rev_count": 937308,
+      "rev_date": "2026-01-30T16:06:07Z",
+      "scrape_date": "2026-02-02T06:16:11.748605Z",
       "stabilities": [
-        "staging",
         "unstable"
       ],
       "unfree": false,
@@ -2039,7 +2025,7 @@
         "out"
       ],
       "outputs": {
-        "out": "/nix/store/6wrfpk1d0y0dzdpsbac6kvph9gya1n64-yq-go-4.50.1"
+        "out": "/nix/store/vw048akg3chy15xk9anfiv4jkkq0g40x-yq-go-4.50.1"
       },
       "system": "x86_64-linux",
       "group": "toplevel",
@@ -2171,12 +2157,12 @@
     },
     {
       "install_id": "helm",
-      "locked-url": "git+file:/Users/cmcdermott/git/eidos?dir=.flox/flakes/helm",
-      "flake-description": "Helm 4.x built from source",
-      "locked-flake-attr-path": "packages.aarch64-darwin.helm",
-      "derivation": "/nix/store/3nsbiq6nyrpp77cycvq2r4b8x9z5w3rv-helm-4.1.0.drv",
+      "locked-url": "gitlab:cmcdermott/flox/792b490027387b19482aa5ad42658ac4b13ea45b?dir=flakes/helm/versions/v4.1.0&host=gitlab-master.nvidia.com&narHash=sha256-boNBRGFOsvqz2gtzkoGzm98lkStaLGWsa3JDbau0yEs%3D",
+      "flake-description": "Helm 4.1.0",
+      "locked-flake-attr-path": "defaultPackage.aarch64-darwin",
+      "derivation": "/nix/store/frfw7aklplg8bz6254ha9hczksxa5p9g-helm-4.1.0.drv",
       "outputs": {
-        "out": "/nix/store/5x3kakwzrklgcdvxd7w54xnwh60bh7i2-helm-4.1.0"
+        "out": "/nix/store/z72rg7889ifj9qmfgjicasmfzkm3kyw9-helm-4.1.0"
       },
       "output-names": [
         "out"
@@ -2200,12 +2186,12 @@
     },
     {
       "install_id": "helm",
-      "locked-url": "git+file:/Users/cmcdermott/git/eidos?dir=.flox/flakes/helm",
-      "flake-description": "Helm 4.x built from source",
-      "locked-flake-attr-path": "packages.aarch64-linux.helm",
-      "derivation": "/nix/store/vngdpqkcrxmazlm14ff2qrp7cicr6g11-helm-4.1.0.drv",
+      "locked-url": "gitlab:cmcdermott/flox/792b490027387b19482aa5ad42658ac4b13ea45b?dir=flakes/helm/versions/v4.1.0&host=gitlab-master.nvidia.com&narHash=sha256-boNBRGFOsvqz2gtzkoGzm98lkStaLGWsa3JDbau0yEs%3D",
+      "flake-description": "Helm 4.1.0",
+      "locked-flake-attr-path": "defaultPackage.aarch64-linux",
+      "derivation": "/nix/store/i514jipivd8g333475fphjxszykzr28d-helm-4.1.0.drv",
       "outputs": {
-        "out": "/nix/store/1r3kf95fnzil88lpizvy8mdbcyis693v-helm-4.1.0"
+        "out": "/nix/store/x6qbxx1zdk9512hdpq7xm7dcvw813z5g-helm-4.1.0"
       },
       "output-names": [
         "out"
@@ -2229,12 +2215,12 @@
     },
     {
       "install_id": "helm",
-      "locked-url": "git+file:/Users/cmcdermott/git/eidos?dir=.flox/flakes/helm",
-      "flake-description": "Helm 4.x built from source",
-      "locked-flake-attr-path": "packages.x86_64-darwin.helm",
-      "derivation": "/nix/store/dc81x9c1jqa49354fhv9n9r1a63chss8-helm-4.1.0.drv",
+      "locked-url": "gitlab:cmcdermott/flox/792b490027387b19482aa5ad42658ac4b13ea45b?dir=flakes/helm/versions/v4.1.0&host=gitlab-master.nvidia.com&narHash=sha256-boNBRGFOsvqz2gtzkoGzm98lkStaLGWsa3JDbau0yEs%3D",
+      "flake-description": "Helm 4.1.0",
+      "locked-flake-attr-path": "defaultPackage.x86_64-darwin",
+      "derivation": "/nix/store/ka78jry8ij66kzzvggb0njg2fmwfyz3r-helm-4.1.0.drv",
       "outputs": {
-        "out": "/nix/store/ih0m9bzf3j749g5353wiwkb5pgvlg8gk-helm-4.1.0"
+        "out": "/nix/store/82yqfybwm2nnjccm1i1jpb84gfmrk0fd-helm-4.1.0"
       },
       "output-names": [
         "out"
@@ -2258,12 +2244,12 @@
     },
     {
       "install_id": "helm",
-      "locked-url": "git+file:/Users/cmcdermott/git/eidos?dir=.flox/flakes/helm",
-      "flake-description": "Helm 4.x built from source",
-      "locked-flake-attr-path": "packages.x86_64-linux.helm",
-      "derivation": "/nix/store/zipnbiadbsbp89a8rppks2s951fag0nw-helm-4.1.0.drv",
+      "locked-url": "gitlab:cmcdermott/flox/792b490027387b19482aa5ad42658ac4b13ea45b?dir=flakes/helm/versions/v4.1.0&host=gitlab-master.nvidia.com&narHash=sha256-boNBRGFOsvqz2gtzkoGzm98lkStaLGWsa3JDbau0yEs%3D",
+      "flake-description": "Helm 4.1.0",
+      "locked-flake-attr-path": "defaultPackage.x86_64-linux",
+      "derivation": "/nix/store/30r6c9pc9lwn740i75zpf67arql4gzrw-helm-4.1.0.drv",
       "outputs": {
-        "out": "/nix/store/2q9scx2i447fjirg8kjw1cgdypr7c2ya-helm-4.1.0"
+        "out": "/nix/store/hf70mcjnqhj39gghqz2xcyrml40d997k-helm-4.1.0"
       },
       "output-names": [
         "out"
