@@ -68,6 +68,36 @@ var PhaseOrder = []ValidationPhaseName{
 	PhaseConformance,
 }
 
+// phaseHasChecks returns true if the given phase defines checks that require
+// cluster resources (RBAC, ConfigMaps, Jobs). Phases with only constraints
+// are evaluated in-memory and do not need cluster setup.
+func phaseHasChecks(recipeResult *recipe.RecipeResult, phase ValidationPhaseName) bool {
+	if recipeResult.Validation == nil {
+		return false
+	}
+	switch phase {
+	case PhaseReadiness:
+		return recipeResult.Validation.PreDeployment != nil &&
+			len(recipeResult.Validation.PreDeployment.Checks) > 0
+	case PhaseDeployment:
+		return recipeResult.Validation.Deployment != nil &&
+			len(recipeResult.Validation.Deployment.Checks) > 0
+	case PhasePerformance:
+		return recipeResult.Validation.Performance != nil &&
+			len(recipeResult.Validation.Performance.Checks) > 0
+	case PhaseConformance:
+		return recipeResult.Validation.Conformance != nil &&
+			len(recipeResult.Validation.Conformance.Checks) > 0
+	case PhaseAll:
+		return phaseHasChecks(recipeResult, PhaseReadiness) ||
+			phaseHasChecks(recipeResult, PhaseDeployment) ||
+			phaseHasChecks(recipeResult, PhasePerformance) ||
+			phaseHasChecks(recipeResult, PhaseConformance)
+	default:
+		return false
+	}
+}
+
 // ValidatePhase runs validation for a specific phase.
 // This is the main entry point for phase-based validation.
 func (v *Validator) ValidatePhase(
@@ -82,9 +112,14 @@ func (v *Validator) ValidatePhase(
 		return v.validateAll(ctx, recipeResult, snap)
 	}
 
-	// For single phase validation, create RBAC and ConfigMaps before running the phase
-	clientset, _, err := k8sclient.GetKubeClient()
-	if err == nil {
+	// Only set up RBAC and ConfigMaps when the phase has checks that need Jobs.
+	// Phases with only constraints are evaluated in-memory.
+	if phaseHasChecks(recipeResult, phase) {
+		clientset, _, err := k8sclient.GetKubeClient()
+		if err != nil {
+			return nil, errors.Wrap(errors.ErrCodeUnavailable, "phase has checks but Kubernetes is unavailable", err)
+		}
+
 		// Create RBAC resources for validation Jobs
 		sharedConfig := agent.Config{
 			Namespace:          v.Namespace,
@@ -94,9 +129,9 @@ func (v *Validator) ValidatePhase(
 		deployer := agent.NewDeployer(clientset, sharedConfig)
 
 		if rbacErr := deployer.EnsureRBAC(ctx); rbacErr != nil {
-			slog.Debug("failed to create RBAC resources", "phase", phase, "error", rbacErr)
-		} else if v.Cleanup {
-			// Cleanup RBAC after phase completes (only if cleanup enabled)
+			return nil, errors.Wrap(errors.ErrCodeInternal, "failed to create RBAC resources for validation Jobs", rbacErr)
+		}
+		if v.Cleanup {
 			//nolint:contextcheck // Using separate context for cleanup to avoid cancellation
 			defer func() {
 				cleanupCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -109,16 +144,15 @@ func (v *Validator) ValidatePhase(
 
 		// Create ConfigMaps for this single-phase validation
 		if cmErr := v.ensureDataConfigMaps(ctx, clientset, snap, recipeResult); cmErr != nil {
-			slog.Warn("failed to create data ConfigMaps", "error", cmErr)
-		} else {
-			// Always cleanup data ConfigMaps (recipe/snapshot) - these are internal
-			//nolint:contextcheck // Using separate context for cleanup to avoid cancellation
-			defer func() {
-				cleanupCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-				defer cancel()
-				v.cleanupDataConfigMaps(cleanupCtx, clientset)
-			}()
+			return nil, errors.Wrap(errors.ErrCodeInternal, "failed to create data ConfigMaps for validation Jobs", cmErr)
 		}
+		// Always cleanup data ConfigMaps (recipe/snapshot) - these are internal
+		//nolint:contextcheck // Using separate context for cleanup to avoid cancellation
+		defer func() {
+			cleanupCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			defer cancel()
+			v.cleanupDataConfigMaps(cleanupCtx, clientset)
+		}()
 	}
 
 	// Run the requested phase
@@ -1203,7 +1237,10 @@ func (v *Validator) validateAll(
 		}
 	}
 
-	if rbacAvailable {
+	// Only set up cluster resources when at least one phase has checks
+	needsCluster := phaseHasChecks(recipeResult, PhaseAll)
+
+	if rbacAvailable && needsCluster {
 		// Create shared agent deployer for RBAC management
 		// RBAC is created once and reused across all phases for efficiency
 		sharedConfig := agent.Config{
@@ -1217,9 +1254,9 @@ func (v *Validator) validateAll(
 		// Ensure RBAC once at the start (idempotent - safe to call multiple times)
 		slog.Debug("creating shared RBAC for all validation phases")
 		if rbacErr := deployer.EnsureRBAC(ctx); rbacErr != nil {
-			slog.Warn("failed to create validation RBAC, check execution will be skipped", "error", rbacErr)
-		} else if v.Cleanup {
-			// Cleanup RBAC at the end (deferred to ensure cleanup even on error, only if cleanup enabled)
+			return nil, errors.Wrap(errors.ErrCodeInternal, "failed to create validation RBAC", rbacErr)
+		}
+		if v.Cleanup {
 			//nolint:contextcheck // Using separate context for cleanup to avoid cancellation
 			defer func() {
 				cleanupCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
@@ -1233,16 +1270,15 @@ func (v *Validator) validateAll(
 		// Create ConfigMaps once at the start (reused across all phases)
 		slog.Debug("creating shared ConfigMaps for snapshot and recipe data")
 		if cmErr := v.ensureDataConfigMaps(ctx, clientset, snap, recipeResult); cmErr != nil {
-			slog.Warn("failed to create data ConfigMaps, check execution will be skipped", "error", cmErr)
-		} else {
-			// Always cleanup data ConfigMaps (recipe/snapshot) - these are internal
-			//nolint:contextcheck // Using separate context for cleanup to avoid cancellation
-			defer func() {
-				cleanupCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-				defer cancel()
-				v.cleanupDataConfigMaps(cleanupCtx, clientset)
-			}()
+			return nil, errors.Wrap(errors.ErrCodeInternal, "failed to create data ConfigMaps", cmErr)
 		}
+		// Always cleanup data ConfigMaps (recipe/snapshot) - these are internal
+		//nolint:contextcheck // Using separate context for cleanup to avoid cancellation
+		defer func() {
+			cleanupCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			defer cancel()
+			v.cleanupDataConfigMaps(cleanupCtx, clientset)
+		}()
 
 		// Create ValidationResult ConfigMap for progressive updates
 		slog.Debug("creating ValidationResult ConfigMap for tracking progress")
@@ -1257,7 +1293,7 @@ func (v *Validator) validateAll(
 				v.cleanupValidationResultConfigMap(cleanupCtx, clientset)
 			}()
 		}
-	} else {
+	} else if needsCluster && !rbacAvailable {
 		slog.Warn("Kubernetes client unavailable, check execution will be skipped in all phases", "error", err)
 	}
 
