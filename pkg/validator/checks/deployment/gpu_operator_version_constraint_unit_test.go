@@ -146,7 +146,7 @@ func TestValidateGPUOperatorVersion(t *testing.T) {
 				Clientset: clientset,
 			}
 
-			gotVersion, gotPassed, err := ValidateGPUOperatorVersion(ctx, tt.constraint)
+			gotVersion, gotPassed, err := ValidateGPUOperatorVersion(ctx, tt.constraint, t)
 
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ValidateGPUOperatorVersion() error = %v, wantErr %v", err, tt.wantErr)
@@ -178,7 +178,7 @@ func TestValidateGPUOperatorVersionNilClient(t *testing.T) {
 		Value: ">= v24.6.0",
 	}
 
-	_, _, err := ValidateGPUOperatorVersion(ctx, constraint)
+	_, _, err := ValidateGPUOperatorVersion(ctx, constraint, t)
 	if err == nil {
 		t.Error("ValidateGPUOperatorVersion() with nil clientset should return error")
 	}

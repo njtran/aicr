@@ -1,0 +1,60 @@
+apiVersion: trainer.kubeflow.org/v1alpha1
+kind: TrainJob
+metadata:
+  name: nccl-all-reduce-tj
+  namespace: ${NAMESPACE}
+spec:
+  runtimeRef:
+    name: nccl-all-reduce-runtime
+  
+  # High-level abstraction: The operator injects these into the Runtime
+  trainer:
+    numNodes: ${WORKER_COUNT}
+    numProcPerNode: ${GPU_COUNT_PER_NODE}
+    image: public.ecr.aws/hpc-cloud/nccl-tests:cuda12.8.1-efa1.43.2-ofiv1.16.3-ncclv2.27.7-1-testsv2.16.9
+    command:
+    - timeout
+    - "1800"
+    - /opt/amazon/openmpi/bin/mpirun
+    args:
+    - -np
+    - "${GPU_COUNT}"
+    - --allow-run-as-root
+    - -bind-to
+    - none
+    - -x
+    - LD_LIBRARY_PATH=/opt/amazon/openmpi/lib:/opt/nccl/build/lib:/opt/amazon/efa/lib:/opt/aws-ofi-nccl/install/lib:/usr/local/nvidia/lib
+    - -x
+    - NCCL_DEBUG=INFO
+    - -x
+    - FI_PROVIDER=efa
+    - -x
+    - FI_EFA_USE_DEVICE_RDMA=1
+    - --mca
+    - pml
+    - ^cm,ucx
+    - /opt/nccl-tests/build/${TEST_TYPE}
+    - -b
+    - ${MIN_MESSAGE_SIZE}
+    - -e
+    - ${MAX_MESSAGE_SIZE}
+
+  # Hardware-specific tuning
+  podTemplateOverrides:
+  - targetJobs: ["node"]
+    spec:
+      nodeSelector:
+        node.kubernetes.io/instance-type: p5.48xlarge
+      tolerations:
+      - key: dedicated
+        operator: Equal
+        value: user-workload
+      containers:
+      - name: node
+        volumeMounts:
+        - mountPath: /dev/shm
+          name: dshm
+      volumes:
+      - name: dshm
+        emptyDir:
+          medium: Memory

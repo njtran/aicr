@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"testing"
 
 	"github.com/NVIDIA/eidos/pkg/errors"
 	"github.com/NVIDIA/eidos/pkg/recipe"
@@ -45,7 +46,7 @@ func init() {
 //
 // Constraint format: "Deployment.gpu-operator.version"
 // Constraint value examples: ">= v24.6.0", "== v25.10.1", "~= v24.6"
-func ValidateGPUOperatorVersion(ctx *checks.ValidationContext, constraint recipe.Constraint) (string, bool, error) {
+func ValidateGPUOperatorVersion(ctx *checks.ValidationContext, constraint recipe.Constraint, t *testing.T) (string, bool, error) {
 	if ctx.Clientset == nil {
 		return "", false, errors.New(errors.ErrCodeInvalidRequest, "kubernetes client not available")
 	}

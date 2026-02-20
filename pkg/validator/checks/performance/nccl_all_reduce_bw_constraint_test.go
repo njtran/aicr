@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package deployment
+package performance
 
 import (
 	"testing"
@@ -20,9 +20,9 @@ import (
 	"github.com/NVIDIA/eidos/pkg/validator/checks"
 )
 
-// TestGPUOperatorVersion validates the GPU operator version constraint.
+// TestNcclAllReduceBw validates the nccl-all-reduce-bw constraint.
 // This integration test runs inside validator Jobs and invokes the validator.
-func TestGPUOperatorVersion(t *testing.T) {
+func TestNcclAllReduceBw(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping integration test in short mode")
 	}
@@ -35,16 +35,16 @@ func TestGPUOperatorVersion(t *testing.T) {
 	defer runner.Cancel()
 
 	// Get constraint from recipe
-	constraint := runner.GetConstraint("deployment", "Deployment.gpu-operator.version")
+	constraint := runner.GetConstraint("performance", "nccl-all-reduce-bw")
 	if constraint == nil {
-		t.Skip("Constraint Deployment.gpu-operator.version not defined in recipe")
+		t.Skip("Constraint nccl-all-reduce-bw not defined in recipe")
 	}
 
 	t.Logf("Validating constraint: %s = %s", constraint.Name, constraint.Value)
 
 	// Run the validator
 	ctx := runner.Context()
-	actual, passed, err := ValidateGPUOperatorVersion(ctx, *constraint, t)
+	actual, passed, err := validateNcclAllReduceBw(ctx, *constraint, t)
 	if err != nil {
 		t.Fatalf("Validation failed: %v", err)
 	}

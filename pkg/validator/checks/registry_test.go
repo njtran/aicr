@@ -349,7 +349,7 @@ func TestRegisterConstraintValidator(t *testing.T) {
 	validator := &ConstraintValidator{
 		Pattern:     "test.pattern",
 		Description: "Test validator",
-		Func: func(ctx *ValidationContext, constraint recipe.Constraint) (string, bool, error) {
+		Func: func(ctx *ValidationContext, constraint recipe.Constraint, t *testing.T) (string, bool, error) {
 			return "test", true, nil
 		},
 	}
@@ -386,7 +386,7 @@ func TestRegisterConstraintValidatorDuplicate(t *testing.T) {
 
 	validator := &ConstraintValidator{
 		Pattern: "duplicate.pattern",
-		Func: func(ctx *ValidationContext, constraint recipe.Constraint) (string, bool, error) {
+		Func: func(ctx *ValidationContext, constraint recipe.Constraint, t *testing.T) (string, bool, error) {
 			return "", false, nil
 		},
 	}

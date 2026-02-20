@@ -1,0 +1,94 @@
+apiVersion: trainer.kubeflow.org/v1alpha1
+kind: TrainingRuntime
+metadata:
+  name: nccl-all-reduce-runtime
+  namespace: ${NAMESPACE}
+  labels:
+    trainer.kubeflow.org/framework: mpi
+spec:
+  mlPolicy:
+    mpi:
+      mpiImplementation: OpenMPI
+      numProcPerNode: "${GPU_COUNT_PER_NODE}"
+      runLauncherAsNode: false
+      sshAuthMountPath: /tmp/mpi-ssh-raw
+  template:
+    spec:
+      network:
+        publishNotReadyAddresses: true
+      replicatedJobs:
+        - name: launcher
+          replicas: 1
+          template:
+            spec:
+              template:
+                spec:
+                  containers:
+                  - name: node
+                    image: public.ecr.aws/hpc-cloud/nccl-tests:cuda12.8.1-efa1.43.2-ofiv1.16.3-ncclv2.27.7-1-testsv2.16.9
+                    resources:
+                      limits:
+                        cpu: "2"
+                        memory: 128Mi
+                    volumeMounts:
+                    - name: mpi-ssh-auth
+                      mountPath: /tmp/mpi-ssh-raw
+                      readOnly: true
+                    - name: ssh-keys
+                      mountPath: /root/.ssh
+                  initContainers:
+                  - name: fix-ssh-permissions
+                    image: alpine:latest
+                    command: ["/bin/sh", "-c"]
+                    args:
+                      - |
+                        cp /tmp/mpi-ssh-raw/* /root/.ssh/ && 
+                        chmod 600 /root/.ssh/id_rsa && 
+                        chmod 644 /root/.ssh/id_rsa.pub /root/.ssh/authorized_keys
+                    volumeMounts:
+                    - name: mpi-ssh-auth
+                      mountPath: /tmp/mpi-ssh-raw
+                      readOnly: true
+                    - name: ssh-keys
+                      mountPath: /root/.ssh
+                  volumes:
+                  - name: ssh-keys
+                    emptyDir: {}
+        
+        - name: node
+          replicas: 1 # Default, overridden by TrainJob
+          template:
+            spec:
+              template:
+                spec:
+                  nodeSelector:
+                    node.kubernetes.io/instance-type: p5.48xlarge
+                  containers:
+                  - name: node
+                    image: public.ecr.aws/hpc-cloud/nccl-tests:cuda12.8.1-efa1.43.2-ofiv1.16.3-ncclv2.27.7-1-testsv2.16.9
+                    # We expect SSHD to be pre-installed in this EFA image
+                    command: ["/usr/sbin/sshd", "-De"] 
+                    readinessProbe:
+                      tcpSocket:
+                        port: 22
+                      initialDelaySeconds: 5
+                    resources:
+                      limits:
+                        nvidia.com/gpu: "8"
+                        vpc.amazonaws.com/efa: "32"
+                      requests:
+                        nvidia.com/gpu: "8"
+                        vpc.amazonaws.com/efa: "32"
+                    securityContext:
+                      capabilities:
+                        add: ["IPC_LOCK"]
+                    volumeMounts:
+                    - name: mpi-ssh-auth
+                      mountPath: /tmp/mpi-ssh-raw
+                      readOnly: true
+                    - name: dshm
+                      mountPath: /dev/shm
+                  volumes:
+                  - name: dshm
+                    hostPath:
+                      path: /dev/shm

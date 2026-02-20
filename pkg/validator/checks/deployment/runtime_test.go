@@ -96,7 +96,7 @@ func TestDeploymentConstraints(t *testing.T) {
 			}
 
 			// Execute the validator
-			actualValue, passed, err := validator.Func(validationCtx, constraint)
+			actualValue, passed, err := validator.Func(validationCtx, constraint, t)
 			if err != nil {
 				t.Errorf("Constraint %s evaluation failed: %v", constraint.Name, err)
 				return

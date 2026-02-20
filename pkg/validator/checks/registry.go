@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"strings"
 	"sync"
+	"testing"
 
 	"github.com/NVIDIA/eidos/pkg/recipe"
 	"github.com/NVIDIA/eidos/pkg/snapshotter"
@@ -58,7 +59,8 @@ type CheckFunc func(ctx *ValidationContext) error
 // ConstraintValidatorFunc is the function signature for constraint validation.
 // It evaluates whether a constraint is satisfied against the cluster state.
 // Returns the actual value found, whether it passed, and any error.
-type ConstraintValidatorFunc func(ctx *ValidationContext, constraint recipe.Constraint) (actual string, passed bool, err error)
+// The testing.T parameter allows logging during validation.
+type ConstraintValidatorFunc func(ctx *ValidationContext, constraint recipe.Constraint, t *testing.T) (actual string, passed bool, err error)
 
 // Check represents a registered validation check.
 type Check struct {
